@@ -10,6 +10,7 @@ Feel free to use it if you like. */
   border: 1px solid black;
   position: relative;
 }
-.circle {
-  fill: "pink";
+.scoreboard {
+  font-family: Roboto, Arial;
+  font-size: 24px;
 }

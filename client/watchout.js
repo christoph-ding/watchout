@@ -11,26 +11,30 @@ var player = {
 var playerHit = false;
 var score = 0;
 var highScore = 0;
+var asteroidColorPalette = ['#bbbdf6', '#9893da', '#797a9e', '#72727e', '#625f63'];
 
 for(var i = 0; i < numberOfAsteroids; i++) {
   var currentAsteroid = {
     x: Math.random() * boardWidth,
     y: Math.random() * boardHeight,
-    r: Math.random() * 50,
-    speed: Math.random() * 4000
+    r: 5 + Math.random() * 45,
+    speed: 1000 + Math.random() * 3000,
+    color: asteroidColorPalette[Math.floor(Math.random() * asteroidColorPalette.length)]
   }
   asteroids.push(currentAsteroid);
 }
 
 var svgContainer = d3.select(".board").append("svg")
+  .transition(2000)
   .attr("height", boardHeight)
-  .attr("width", boardWidth);
+  .attr("width", boardWidth)
+  .attr("fill", "red");
 
 var asteroidMaker = d3.select(".board").select("svg").selectAll("circle")
   .data(asteroids)
   .enter()
   .append("circle")
-  .attr("fill", "#A9F5D0")
+  .attr("fill", function(d) {return d.color})
   .attr("cx", function(d) {return d.x;})
   .attr("cy", function(d) {return d.y;})
   .attr("r", function(d) {return d.r;})
@@ -55,14 +59,16 @@ var playerMaker = d3.select(".board").select("svg").selectAll("player")
   .attr("cy", player.y)
   .attr("r", player.r)
   .call(drag)
-  // .transition().duration(3000)
+  .transition().duration(3000)
   .attr("fill", "blue")
 
 var newCoordinates = function() {
   for(var i = 0; i < asteroids.length; i++) {
     asteroids[i]['x'] = Math.random() * boardWidth;
     asteroids[i]['y'] = Math.random() * boardHeight;
-    asteroids[i]['speed'] = asteroids[i]['speed'] * (0.5 + Math.random() )
+    asteroids[i]['r'] = 5 + Math.random() * 45;
+    asteroids[i]['speed'] = 1000 + Math.random() * 3000;
+    asteroids[i]['color'] = asteroidColorPalette[Math.floor(Math.random() * asteroidColorPalette.length)];
   }
 };
 
@@ -71,7 +77,9 @@ var updateElements = function() {
     .data(asteroids)
     .transition().duration(function(d) {return d.speed;})
     .attr("cx", function(d) {return d.x;})
-    .attr("cy", function(d) {return d.y;});
+    .attr("cy", function(d) {return d.y;})
+    .attr("r", function(d) {return d.r;})
+    .attr("fill", function(d) {return d.color});
 };
 
 var collisionDetector = function() {
@@ -99,7 +107,7 @@ setInterval(function() {
   score++;
   highScore = Math.max(highScore, score);
   d3.select(".scoreboard").selectAll(".highscore")
-    .text("Highscore: " + highScore);
+    .text("High score: " + highScore);
 }, 100)
 
 d3.timer(collisionDetector);
