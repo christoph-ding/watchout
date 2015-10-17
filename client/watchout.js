@@ -1,7 +1,7 @@
 // start slingin' some d3 here.
 var asteroids = [];
-var numberOfAsteroids = 20;
-var boardHeight = 800;
+var numberOfAsteroids = 10;
+var boardHeight = 600;
 var boardWidth = 800;
 var player = {
   x: boardWidth / 2,
@@ -9,15 +9,15 @@ var player = {
   r: 35
 };
 var playerHit = false;
+var score = 0;
+var highScore = 0;
 
 for(var i = 0; i < numberOfAsteroids; i++) {
   var currentAsteroid = {
     x: Math.random() * boardWidth,
     y: Math.random() * boardHeight,
-    oldX: Math.random() * boardWidth,
-    oldY: Math.random() * boardHeight,
     r: Math.random() * 50,
-    speed: Math.random() * 5000
+    speed: Math.random() * 4000
   }
   asteroids.push(currentAsteroid);
 }
@@ -30,20 +30,20 @@ var asteroidMaker = d3.select(".board").select("svg").selectAll("circle")
   .data(asteroids)
   .enter()
   .append("circle")
-  .attr("fill", "green")
+  .attr("fill", "#A9F5D0")
   .attr("cx", function(d) {return d.x;})
   .attr("cy", function(d) {return d.y;})
   .attr("r", function(d) {return d.r;})
-  // .transition().duration(function(d) {return d.speed;})
-  .attr("cx", function(d) {return Math.random() * boardWidth;})
-  .attr("cy", function(d) {return Math.random() * boardHeight;})
-  .attr("fill", "#A9F5D0");
 
 var drag = d3.behavior.drag()
   .on("drag", function(d) {
+    var newX = Math.min(Math.max(player.r, d3.event.x), boardWidth - player.r);
+    var newY = Math.min(Math.max(player.r, d3.event.y), boardHeight - player.r);
     d3.select(this)
-    .attr("cx", d3.event.x)
-    .attr("cy", d3.event.y);
+      .attr("cx", newX)
+      .attr("cy", newY);
+    player.x = newX;
+    player.y = newY;
   });
 
 var playerMaker = d3.select(".board").select("svg").selectAll("player")
@@ -60,8 +60,6 @@ var playerMaker = d3.select(".board").select("svg").selectAll("player")
 
 var newCoordinates = function() {
   for(var i = 0; i < asteroids.length; i++) {
-    asteroids[i]['oldX'] = asteroids[i]['x'];
-    asteroids[i]['oldY'] = asteroids[i]['y'];
     asteroids[i]['x'] = Math.random() * boardWidth;
     asteroids[i]['y'] = Math.random() * boardHeight;
     asteroids[i]['speed'] = asteroids[i]['speed'] * (0.5 + Math.random() )
@@ -72,41 +70,37 @@ var updateElements = function() {
   d3.select(".board").select("svg").selectAll("circle")
     .data(asteroids)
     .transition().duration(function(d) {return d.speed;})
-    .tween('attr', tweenFunc)
     .attr("cx", function(d) {return d.x;})
     .attr("cy", function(d) {return d.y;});
 };
 
-var tweenFunc = function(d) {
-  var xInterpolator = d3.interpolateNumber(d.oldX, d.x);
-  var yInterpolator = d3.interpolateNumber(d.oldY, d.y);
-  debugger;
-  return function(t) {
-    d.cx = xInterpolator(t);
-    d.cy = yInterpolator(t);
-  };
-}
-
-var collisionDetector = function(asteroid) {
-  var asteroidX = asteroid['x'];
-  var asteroidY = asteroid['y'];
-  var asteroidR = asteroid['r']; 
-  var playerX = player['x'];
-  var playerY = player['y'];
-  var playerR = player['r'];
-
-  var distance = Math.sqrt( (asteroidX - playerX) * (asteroidX - playerX) + (asteroidY - playerY) * (asteroidY - playerY))
-  if((distance < (playerR + asteroidR))) console.log("hittt");
-  if ((distance < (playerR + asteroidR)) && playerHit === false) {
-    playerHit = true;
-    console.log('hit');
-  }
-}
+var collisionDetector = function() {
+  d3.select(".board").select("svg").selectAll("circle")
+  .data(asteroids)
+  .each(function() {
+    var asteroidX = Number(this.attributes.cx.value);
+    var asteroidY = Number(this.attributes.cy.value);
+    var asteroidR = Number(this.attributes.r.value);
+    var distance = Math.sqrt( (asteroidX - player.x) * (asteroidX - player.x) + (asteroidY - player.y) * (asteroidY - player.y))
+    if (distance < (player.r + asteroidR)) {
+      score = 0;
+    }
+  });
+};
 
 setInterval(function() {
   newCoordinates();
   updateElements();
 }, 4000);
+
+setInterval(function() {
+  d3.select(".scoreboard").selectAll(".current")
+    .text("Current score: " + score);
+  score++;
+  highScore = Math.max(highScore, score);
+  d3.select(".scoreboard").selectAll(".highscore")
+    .text("Highscore: " + highScore);
+}, 100)
 
 d3.timer(collisionDetector);
 
