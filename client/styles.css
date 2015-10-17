@@ -8,9 +8,37 @@ Feel free to use it if you like. */
   margin-left: auto;
   margin-right: auto;
   border: 1px solid black;
-  position: relative;
+  position: relative;  
+  animation: smoothChange 13s;
+  -webkit-animation: smoothChange 13s;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-direction: alternate;
 }
+
+@-webkit-keyframes smoothChange {
+  0% {background: #FFE066;}
+  25% {background: #FFC600;}
+  50% {background: #E03616;}
+  75% {background: #FF7F11;}
+  100% {background: #BE4734;}
+}
+
 .scoreboard {
   font-family: Roboto, Arial;
   font-size: 24px;
+}
+
+.chartBar {
+  background-color: #BE4734;
+}
+
+.node {
+    fill: #ccc;
+    stroke: #fff;
+    stroke-width: 2px;
+}
+
+.link {
+    stroke: #777;
+    stroke-width: 2px;
 }

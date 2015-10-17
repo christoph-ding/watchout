@@ -1,17 +1,19 @@
 // start slingin' some d3 here.
 var asteroids = [];
-var numberOfAsteroids = 10;
+var numberOfAsteroids = 17;
 var boardHeight = 600;
 var boardWidth = 800;
-var player = {
-  x: boardWidth / 2,
-  y: boardHeight / 2,
-  r: 35
-};
 var playerHit = false;
 var score = 0;
 var highScore = 0;
-var asteroidColorPalette = ['#bbbdf6', '#9893da', '#797a9e', '#72727e', '#625f63'];
+var asteroidColorPalette = ['#bbbdf6', '#9893da', '#797a9e', '#72727e', '#625f63', '#13293D', '#006494', '#247BA0', '#1B98E0', '#E8F1F2', "#020122" ,"#5BC3EB", "#533A71"];
+var playerColorPalette = ['#FFCF56', "#FF521B", "#F06449","#FFED72", "#F0C808", "#E55934", "#FA7921", "#FE5F55", "#E93107"];
+var player = {
+  x: boardWidth / 2,
+  y: boardHeight / 2,
+  r: 35,
+  color: playerColorPalette[Math.floor(Math.random() * playerColorPalette.length)]
+};
 
 for(var i = 0; i < numberOfAsteroids; i++) {
   var currentAsteroid = {
@@ -28,12 +30,12 @@ var svgContainer = d3.select(".board").append("svg")
   .transition(2000)
   .attr("height", boardHeight)
   .attr("width", boardWidth)
-  .attr("fill", "red");
 
 var asteroidMaker = d3.select(".board").select("svg").selectAll("circle")
   .data(asteroids)
   .enter()
   .append("circle")
+  .classed("enemy", true)
   .attr("fill", function(d) {return d.color})
   .attr("cx", function(d) {return d.x;})
   .attr("cy", function(d) {return d.y;})
@@ -54,13 +56,16 @@ var playerMaker = d3.select(".board").select("svg").selectAll("player")
   .data([player])
   .enter()
   .append("circle")
-  .attr("fill", "green")
+  .classed("player", true)
+  .attr("fill", "#00283A")
   .attr("cx", player.x)
   .attr("cy", player.y)
   .attr("r", player.r)
   .call(drag)
   .transition().duration(3000)
-  .attr("fill", "blue")
+  .attr("fill", player.color)
+  .attr("stroke-opacity", 0.2)
+  .attr("stroke", "red")
 
 var newCoordinates = function() {
   for(var i = 0; i < asteroids.length; i++) {
@@ -71,6 +76,14 @@ var newCoordinates = function() {
     asteroids[i]['color'] = asteroidColorPalette[Math.floor(Math.random() * asteroidColorPalette.length)];
   }
 };
+
+var updatePlayerColor = function() {
+  player['color'] = playerColorPalette[Math.floor(Math.random() * playerColorPalette.length)];
+  d3.select(".board").select("svg").selectAll(".player")
+    .transition().duration(5000)
+    .attr("fill", player.color);
+}
+
 
 var updateElements = function() {
   d3.select(".board").select("svg").selectAll("circle")
@@ -87,6 +100,7 @@ var collisionDetector = function() {
   .data(asteroids)
   .each(function() {
     var asteroidX = Number(this.attributes.cx.value);
+  d3
     var asteroidY = Number(this.attributes.cy.value);
     var asteroidR = Number(this.attributes.r.value);
     var distance = Math.sqrt( (asteroidX - player.x) * (asteroidX - player.x) + (asteroidY - player.y) * (asteroidY - player.y))
@@ -99,6 +113,7 @@ var collisionDetector = function() {
 setInterval(function() {
   newCoordinates();
   updateElements();
+  updatePlayerColor();
 }, 4000);
 
 setInterval(function() {
@@ -111,4 +126,6 @@ setInterval(function() {
 }, 100)
 
 d3.timer(collisionDetector);
+
+
 
